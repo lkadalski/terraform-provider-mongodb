@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/net/proxy"
+	"log"
 	"net/url"
 	"strconv"
 	"time"
@@ -130,12 +131,13 @@ func (c *ClientConfig) MongoClient() (*mongo.Client, error) {
 	}
 
 	opts := options.Client().ApplyURI(uri).SetDialer(dialer)
+	log.Println("URI is %s", uri)
 	if len(c.Username) > 0 && len(c.Password) > 0 {
 		opts.SetAuth(options.Credential{
 			AuthSource: c.DB, Username: c.Username, Password: c.Password,
 		})
 	}
-
+	log.Println("Options are: %w ", opts)
 	if c.Certificate != "" || verify {
 		tlsConfig, err := getTLSConfig([]byte(c.Certificate), verify)
 		if err != nil {
