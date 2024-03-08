@@ -131,7 +131,6 @@ func (c *ClientConfig) MongoClient() (*mongo.Client, error) {
 	}
 
 	opts := options.Client().ApplyURI(uri).SetDialer(dialer)
-	log.Println("URI is %s", uri)
 	if len(c.Username) > 0 && len(c.Password) > 0 {
 		opts.SetAuth(options.Credential{
 			AuthSource: c.DB, Username: c.Username, Password: c.Password,

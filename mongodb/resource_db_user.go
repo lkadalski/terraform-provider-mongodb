@@ -140,7 +140,8 @@ func resourceDatabaseUserRead(ctx context.Context, data *schema.ResourceData, i 
 	result, decodeError := getUser(client, username, database)
 	tflog.Warn(ctx, "Config debug", map[string]interface{}{"client": client, "config": config})
 	if decodeError != nil {
-		return diag.Errorf("Error decoding user : %w : %w: %+v", decodeError, client, config)
+
+		return diag.Errorf("Error decoding user : %w : %#v ", decodeError, config.Config)
 	}
 	if len(result.Users) == 0 {
 		return diag.Errorf("user does not exist")
