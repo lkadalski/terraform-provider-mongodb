@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/mapstructure"
@@ -137,6 +138,7 @@ func resourceDatabaseUserRead(ctx context.Context, data *schema.ResourceData, i 
 		return diag.Errorf("%s", err)
 	}
 	result, decodeError := getUser(client, username, database)
+	tflog.Warn(ctx, "Config debug", map[string]interface{}{"client": client, "config": config})
 	if decodeError != nil {
 		return diag.Errorf("Error decoding user : %w : %w: %+v", decodeError, client, config)
 	}
