@@ -94,7 +94,7 @@ func addArgs(arguments string, newArg string) string {
 }
 
 func (c *ClientConfig) MongoClient() (*mongo.Client, error) {
-
+	log.Printf("[WARN] MongoClient initialise")
 	var verify = false
 	var arguments = ""
 
@@ -124,6 +124,7 @@ func (c *ClientConfig) MongoClient() (*mongo.Client, error) {
 	}
 	uri += arguments
 
+	log.Printf("[WARN] URI: %v", uri)
 	dialer, dialerErr := proxyDialer(c)
 
 	if dialerErr != nil {
@@ -136,7 +137,7 @@ func (c *ClientConfig) MongoClient() (*mongo.Client, error) {
 			AuthSource: c.DB, Username: c.Username, Password: c.Password,
 		})
 	}
-	log.Println("Options are: %w ", opts)
+	log.Printf("[WARN] Options are: %v ", opts)
 	if c.Certificate != "" || verify {
 		tlsConfig, err := getTLSConfig([]byte(c.Certificate), verify)
 		if err != nil {
@@ -146,6 +147,7 @@ func (c *ClientConfig) MongoClient() (*mongo.Client, error) {
 	}
 
 	client, err := mongo.NewClient(opts)
+	log.Printf("[WARN] MongoClient initialise finish")
 	return client, err
 }
 
@@ -182,6 +184,7 @@ func (resource Resource) String() string {
 }
 
 func createUser(client *mongo.Client, user DbUser, roles []Role, database string) error {
+	log.Printf("[WARN] createUser initialise")
 	var result *mongo.SingleResult
 	if len(roles) != 0 {
 		result = client.Database(database).RunCommand(context.Background(), bson.D{{Key: "createUser", Value: user.Name},
@@ -190,14 +193,17 @@ func createUser(client *mongo.Client, user DbUser, roles []Role, database string
 		result = client.Database(database).RunCommand(context.Background(), bson.D{{Key: "createUser", Value: user.Name},
 			{Key: "pwd", Value: user.Password}, {Key: "roles", Value: []bson.M{}}})
 	}
-
 	if result.Err() != nil {
+		log.Printf("[WARN] Error adding user %v to a database %s, %v", user.Name, database, result.Err())
 		return result.Err()
 	}
+	log.Printf("[WARN] Added user %v with a roles: %v to a database %s", user.Name, roles, database)
+	log.Printf("[WARN] createUser finish")
 	return nil
 }
 
 func getUser(client *mongo.Client, username string, database string) (SingleResultGetUser, error) {
+	log.Printf("[WARN] getUser initialise")
 	var result *mongo.SingleResult
 	result = client.Database(database).RunCommand(context.Background(), bson.D{{Key: "usersInfo", Value: bson.D{
 		{Key: "user", Value: username},
@@ -209,6 +215,7 @@ func getUser(client *mongo.Client, username string, database string) (SingleResu
 	if err != nil {
 		return decodedResult, err
 	}
+	log.Printf("[WARN] getUser finish")
 	return decodedResult, nil
 }
 
@@ -262,25 +269,29 @@ func createRole(client *mongo.Client, role string, roles []Role, privilege []Pri
 }
 
 func MongoClientInit(conf *MongoDatabaseConfiguration) (*mongo.Client, error) {
-
+	log.Printf("[WARN] MongoClientInit initialise start")
 	client, err := conf.Config.MongoClient()
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("[WARN] Client connect")
 	ctx, cancel := context.WithTimeout(context.Background(), conf.MaxConnLifetime*time.Second)
 	defer cancel()
 	err = client.Connect(ctx)
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("[WARN] Client Ping")
 	err = client.Ping(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("[WARN] MongoClientInit initalise finish")
 	return client, nil
 }
 
 func proxyDialer(c *ClientConfig) (options.ContextDialer, error) {
+	log.Printf("[WARN] ProxyDialer initialise start")
 	proxyFromEnv := proxy.FromEnvironment().(options.ContextDialer)
 	proxyFromProvider := c.Proxy
 
@@ -297,5 +308,6 @@ func proxyDialer(c *ClientConfig) (options.ContextDialer, error) {
 		return proxyDialer.(options.ContextDialer), nil
 	}
 
+	log.Printf("[WARN] ProxyDialer finish start")
 	return proxyFromEnv, nil
 }
