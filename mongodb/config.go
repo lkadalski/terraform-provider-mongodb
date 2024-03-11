@@ -282,10 +282,10 @@ func MongoClientInit(conf *MongoDatabaseConfiguration) (*mongo.Client, error) {
 		return nil, err
 	}
 	log.Printf("[WARN] Client Ping")
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
+	// err = client.Ping(ctx, nil)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	log.Printf("[WARN] MongoClientInit initalise finish")
 	return client, nil
 }
